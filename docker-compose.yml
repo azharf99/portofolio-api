@@ -1,0 +1,36 @@
+services:
+  # Service Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: gothub-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER?Error! DB_USER belum diset di file .env!}
+      POSTGRES_PASSWORD: ${DB_PASSWORD?Error! DB_PASSWORD wajib diisi demi keamanan!}
+      POSTGRES_DB: ${DB_NAME?Error! Nama database belum diset!}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Service Aplikasi Golang kita
+  api:
+    image: azharfa/gothub-erp-api:latest
+    container_name: portfolio_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db 
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password_kamu}
+      - DB_NAME=${DB_NAME:-portofolio_db}
+      - DB_PORT=5432
+      - PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-kunci_rahasia_kamu}
+      - GIN_MODE=release
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
