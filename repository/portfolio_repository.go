@@ -21,14 +21,13 @@ func (r *portfolioRepository) Fetch(limit, offset int, search, industry, pType s
 	query := r.db.Model(&domain.Portfolio{}).Where("is_published = ?", true)
 
 	if search != "" {
-		// Use PostgreSQL full-text search
-		query = query.Where("to_tsvector('english', title || ' ' || description) @@ to_tsquery('english', ?)", search)
+		query = query.Where("title ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 	if industry != "" {
-		query = query.Where("industry = ?", industry)
+		query = query.Where("industry ILIKE ?", "%"+industry+"%")
 	}
 	if pType != "" {
-		query = query.Where("type = ?", pType)
+		query = query.Where("type ILIKE ?", "%"+pType+"%")
 	}
 
 	query.Count(&total)
