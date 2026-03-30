@@ -21,8 +21,8 @@ func NewPortfolioHandler(r *gin.RouterGroup, us domain.PortfolioUsecase) {
 
 	r.GET("/portfolios", handler.Fetch)
 	r.POST("/portfolios", handler.Store)
-	r.PUT("/portfolios/:id", handler.Update)    // BARU
-	r.DELETE("/portfolios/:id", handler.Delete) // BARU
+	r.PUT("/portfolios/:id", handler.Update)
+	r.DELETE("/portfolios/:id", handler.Delete)
 }
 
 func (h *PortfolioHandler) Fetch(c *gin.Context) {
@@ -62,7 +62,6 @@ func (h *PortfolioHandler) Store(c *gin.Context) {
 }
 
 func (h *PortfolioHandler) Update(c *gin.Context) {
-	// Ambil ID dari URL (contoh: /portfolios/1)
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
