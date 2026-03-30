@@ -14,19 +14,24 @@ import (
 // SetupDatabase bertugas membuka koneksi ke PostgreSQL
 func SetupDatabase() *gorm.DB {
 	// Membaca konfigurasi dari Environment Variables (diset via Docker nanti)
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
-		host, user, password, dbname, port)
+	// ==========================================
+	// 2. KONFIGURASI DATABASE POSTGRESQL
+	// ==========================================
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_PORT"),
+	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Gagal terkoneksi ke database PostgreSQL:", err)
+		log.Fatal("Gagal terhubung ke database PostgreSQL:", err)
 	}
+	fmt.Println("Berhasil terhubung ke database PostgreSQL!")
 
 	// Migrasi tabel otomatis
 	err = db.AutoMigrate(&domain.Portfolio{}, &domain.User{})

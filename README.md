@@ -38,3 +38,68 @@ Sebuah RESTful API tangguh dan aman yang dibangun menggunakan **Golang** untuk m
 ├── Dockerfile        # Konfigurasi image aplikasi
 ├── docker-compose.yml# Orkestrasi Database dan API
 └── main.go           # Titik masuk aplikasi (Entry Point)
+```
+
+## 🚀 Cara Menjalankan Aplikasi
+- Persyaratan SistemGo (v1.21 atau lebih baru)
+- Docker & Docker Compose
+
+# 1. Menjalankan via Docker (Direkomendasikan)
+Cara termudah untuk menjalankan API beserta databasenya adalah menggunakan Docker Compose.
+
+**Clone repository**
+```bash
+git clone https://github.com/azharf99/portofolio-api.git
+cd portofolio-api
+```
+
+**Jalankan container di background**
+```bash
+docker-compose up -d --build
+```
+
+**Cek log aplikasi untuk memastikan berjalan lancar**
+```bash
+docker-compose logs -f api
+```
+
+**Aplikasi akan berjalan di http://localhost:8080.**
+
+# 2. Menjalankan Unit Test
+
+Proyek ini mengutamakan kualitas kode. Untuk menjalankan unit test dan melihat code coverage:
+
+**Download semua dependency**
+```bash
+go mod tidy
+```
+
+**Jalankan seluruh test**
+```bash
+go test ./... -cover
+```
+
+## 📡 Dokumentasi API (Endpoints)
+
+# Public Routes (Tidak butuh token)
+
+| Method | Endpoint | Deskripsi | Query Params (Opsional) |
+| POST | /api/login | Login admin (Mendapatkan JWT) | - |
+| GET | /api/portfolios | Mengambil data portofolio | page, limit, search, industry, type |
+
+# Private Routes (Butuh Header Authorization: Bearer <token>)
+
+| Method | Endpoint | Deskripsi |
+| POST | /api/admin/portfolios | Menambahkan portofolio baru |
+| PUT | /api/admin/portfolios/:id | Memperbarui data portofolio |
+| DELETE | /api/admin/portfolios/:id | Menghapus portofolio |
+| PUT | /api/admin/user/:id | Memperbarui data user |
+| DELETE | /api/admin/user/:id | Menghapus user |
+
+## 🔒 Variabel Lingkungan (Environment Variables)
+
+Aplikasi ini membaca konfigurasi dari environment variables. Saat menggunakan Docker Compose, ini sudah diatur secara otomatis. Jika menjalankan secara lokal, Anda bisa mengatur:
+`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT`, `JWT_SECRET` (Sangat disarankan untuk diganti di lingkungan produksi), `GIN_MODE` (Set ke release saat deployment)
+
+
+**Dibuat dengan ❤️ oleh azharf99**

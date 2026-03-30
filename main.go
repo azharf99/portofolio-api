@@ -20,7 +20,7 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Info: File .env tidak ditemukan. Membaca konfigurasi dari Docker Environment.")
 	}
 
 	// Ambil JWT Secret dari env, fallback jika kosong

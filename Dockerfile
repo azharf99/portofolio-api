@@ -16,6 +16,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o portfolio-api main.go
 
 # Stage 2: Container final yang sangat ringan
 FROM alpine:latest
+RUN apk add --no-cache tzdata
 
 WORKDIR /app
 
