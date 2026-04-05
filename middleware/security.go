@@ -1,46 +1,77 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
+	"os"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/time/rate"
 )
 
-// SecurityHeaders mencegah XSS dan Clickjacking
+// SecurityHeaders menambahkan header keamanan standar industri
 func SecurityHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("X-Frame-Options", "DENY")
+		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("X-Content-Type-Options", "nosniff")
+		c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 		c.Next()
 	}
 }
 
-// AuthMiddleware mengecek dan memvalidasi JWT Token
-func AuthMiddleware(secret string) gin.HandlerFunc {
+// SetupCORS membatasi domain mana saja yang boleh mengakses API ini
+func SetupCORS() gin.HandlerFunc {
+	// KEAMANAN: Konfigurasi CORS Dinamis
+	allowedOriginsEnv := os.Getenv("ALLOWED_ORIGINS")
+	var allowedOrigins []string
+	if allowedOriginsEnv == "" {
+		allowedOrigins = []string{"http://localhost:5173"} // Fallback aman
+	} else {
+		allowedOrigins = strings.Split(allowedOriginsEnv, ",")
+	}
+	return cors.New(cors.Config{
+		// Nanti ganti dengan domain frontend Anda yang sebenarnya
+		AllowOrigins:     allowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	})
+}
+
+// --- Rate Limiter In-Memory ---
+// Melindungi server dari spam request (misal: frontend stuck di infinite loop refresh token)
+
+var visitors = make(map[string]*rate.Limiter)
+var mu sync.Mutex
+
+func getVisitor(ip string) *rate.Limiter {
+	mu.Lock()
+	defer mu.Unlock()
+
+	limiter, exists := visitors[ip]
+	if !exists {
+		// Mengizinkan 3 request per detik, dengan burst maksimal 6 request
+		limiter = rate.NewLimiter(3, 6)
+		visitors[ip] = limiter
+	}
+	return limiter
+}
+
+func RateLimiter() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token tidak ditemukan"})
+		limiter := getVisitor(c.ClientIP())
+		if !limiter.Allow() {
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
+				"error": "Terlalu banyak permintaan, silakan coba beberapa saat lagi.",
+			})
 			return
 		}
-
-		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("metode signing tidak valid")
-			}
-			return []byte(secret), nil
-		})
-
-		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
-			return
-		}
-
 		c.Next()
 	}
 }

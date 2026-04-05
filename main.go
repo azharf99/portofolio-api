@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/azharf99/portofolio-api/config"
 	"github.com/azharf99/portofolio-api/middleware"
 	"github.com/azharf99/portofolio-api/routes"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -34,14 +32,8 @@ func main() {
 
 	// 3. Pasang Middleware Keamanan Global & CORS
 	r.Use(middleware.SecurityHeaders())
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // Ganti dengan domainmu nanti saat deploy
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	r.Use(middleware.SetupCORS())
+	r.Use(middleware.RateLimiter())
 
 	// 4. Setup Routing (Memanggil dari package routes)
 	routes.SetupRoutes(r, db, jwtSecret)
