@@ -26,9 +26,23 @@ func (r *userRepository) GetByID(id uint) (domain.User, error) {
 }
 
 func (r *userRepository) Update(id uint, user *domain.User) error {
-	return r.db.Model(&domain.User{}).Where("id = ?", id).Updates(user).Error
+	result := r.db.Model(&domain.User{}).Where("id = ?", id).Updates(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (r *userRepository) Delete(id uint) error {
-	return r.db.Delete(&domain.User{}, id).Error
+	result := r.db.Delete(&domain.User{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

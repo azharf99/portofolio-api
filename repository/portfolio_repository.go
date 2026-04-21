@@ -40,10 +40,23 @@ func (r *portfolioRepository) Store(portfolio *domain.Portfolio) error {
 }
 
 func (r *portfolioRepository) Update(id uint, portfolio *domain.Portfolio) error {
-	// Updates() akan memperbarui field yang tidak kosong saja
-	return r.db.Model(&domain.Portfolio{}).Where("id = ?", id).Updates(portfolio).Error
+	result := r.db.Model(&domain.Portfolio{}).Where("id = ?", id).Updates(portfolio)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (r *portfolioRepository) Delete(id uint) error {
-	return r.db.Delete(&domain.Portfolio{}, id).Error
+	result := r.db.Delete(&domain.Portfolio{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

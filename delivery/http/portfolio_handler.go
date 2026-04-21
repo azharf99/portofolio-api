@@ -6,6 +6,7 @@ import (
 
 	"github.com/azharf99/portofolio-api/domain"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type PortfolioHandler struct {
@@ -29,8 +30,26 @@ func (h *PortfolioHandler) Fetch(c *gin.Context) {
 	search := c.Query("search")
 	industry := c.Query("industry")
 	pType := c.Query("type")
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query page harus berupa angka"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query limit harus berupa angka"})
+		return
+	}
+
+	if page <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query page harus lebih dari 0"})
+		return
+	}
+	if limit <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query limit harus lebih dari 0"})
+		return
+	}
 
 	portfolios, total, err := h.usecase.Fetch(page, limit, search, industry, pType)
 	if err != nil {
@@ -76,6 +95,10 @@ func (h *PortfolioHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.usecase.Update(uint(id), &portfolio); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Portofolio tidak ditemukan"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -92,6 +115,10 @@ func (h *PortfolioHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.usecase.Delete(uint(id)); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Portofolio tidak ditemukan"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

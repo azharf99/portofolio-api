@@ -93,8 +93,8 @@ go test ./... -cover
 | POST | /api/admin/portfolios | Menambahkan portofolio baru |
 | PUT | /api/admin/portfolios/:id | Memperbarui data portofolio |
 | DELETE | /api/admin/portfolios/:id | Menghapus portofolio |
-| PUT | /api/admin/user/:id | Memperbarui data user |
-| DELETE | /api/admin/user/:id | Menghapus user |
+| PUT | /api/admin/users/:id | Memperbarui data user |
+| DELETE | /api/admin/users/:id | Menghapus user |
 
 ## 🔒 Variabel Lingkungan (Environment Variables)
 

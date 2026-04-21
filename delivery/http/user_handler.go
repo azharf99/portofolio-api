@@ -6,6 +6,7 @@ import (
 
 	"github.com/azharf99/portofolio-api/domain"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -58,6 +59,10 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.usecase.Update(uint(id), &user); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,6 +79,10 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.usecase.Delete(uint(id)); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

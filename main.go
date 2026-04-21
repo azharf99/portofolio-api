@@ -24,7 +24,7 @@ func main() {
 	// Ambil JWT Secret dari env, fallback jika kosong
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		jwtSecret = "RAHASIA_NEGARA_SANGAT_AMAN_SEKALI_99"
+		log.Fatal("JWT_SECRET wajib diisi untuk menjalankan aplikasi")
 	}
 
 	// 2. Setup Framework Gin

@@ -18,7 +18,17 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
-		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Format token tidak valid"})
+			return
+		}
+
+		tokenString := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+		if tokenString == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
+			return
+		}
+
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("metode signing tidak valid")
@@ -31,6 +41,20 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
+			return
+		}
+
+		userID, exists := claims["sub"]
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
+			return
+		}
+
+		c.Set("user_id", userID)
+		c.Set("jwt_claims", claims)
 		c.Next()
 	}
 }
