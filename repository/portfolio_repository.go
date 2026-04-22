@@ -31,7 +31,7 @@ func (r *portfolioRepository) Fetch(limit, offset int, search, industry, pType s
 	}
 
 	query.Count(&total)
-	err := query.Offset(offset).Limit(limit).Find(&portfolios).Error
+	err := query.Preload("Images").Offset(offset).Limit(limit).Find(&portfolios).Error
 	return portfolios, total, err
 }
 
@@ -40,7 +40,10 @@ func (r *portfolioRepository) Store(portfolio *domain.Portfolio) error {
 }
 
 func (r *portfolioRepository) Update(id uint, portfolio *domain.Portfolio) error {
-	result := r.db.Model(&domain.Portfolio{}).Where("id = ?", id).Updates(portfolio)
+	// Untuk update dengan asosiasi (Images), kita perlu menggunakan Save atau mengelola asosiasi secara manual
+	// Di sini kita gunakan Save untuk mempermudah sinkronisasi data termasuk Images
+	portfolio.ID = id
+	result := r.db.Save(portfolio)
 	if result.Error != nil {
 		return result.Error
 	}

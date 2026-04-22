@@ -27,7 +27,14 @@ Dokumen ini adalah panduan implementasi frontend berdasarkan endpoint backend ya
 
 - `POST /api/admin/portfolios`
 - `PUT /api/admin/portfolios/:id`
-  - Error tambahan: `404` jika portfolio tidak ditemukan.
+  - Body: `multipart/form-data` (Bukan JSON lagi)
+  - Fields:
+    - `title`, `description`, `role`, `type`, `industry`, `tech_stack`, `project_link`, `is_published`: string/text
+    - `start_date`, `end_date`: string (format `YYYY-MM-DD`)
+  - Files:
+    - `image`: file (Single, untuk gambar utama)
+    - `images`: file[] (Multiple, untuk galeri gambar)
+  - Error tambahan: `404` jika portfolio tidak ditemukan, `400` jika file bukan gambar atau mengandung konten berbahaya.
 - `DELETE /api/admin/portfolios/:id`
   - Error tambahan: `404` jika portfolio tidak ditemukan.
 - `PUT /api/admin/users/:id`
@@ -40,6 +47,14 @@ Dokumen ini adalah panduan implementasi frontend berdasarkan endpoint backend ya
 Gunakan tipe data yang konsisten:
 
 ```ts
+export type PortfolioImage = {
+  id: number;
+  portfolio_id: number;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Portfolio = {
   id: number;
   title: string;
@@ -49,7 +64,8 @@ export type Portfolio = {
   industry: string;
   tech_stack: string;
   project_link: string;
-  image_url: string;
+  image_url: string; // URL gambar utama
+  images: PortfolioImage[]; // Daftar gambar galeri
   start_date: string; // ISO datetime
   end_date: string;   // ISO datetime
   is_published: boolean;
@@ -146,7 +162,9 @@ Contoh fungsi API:
 - Portfolio form:
   - `title`, `description`, `role`, `type`, `industry` required.
   - `project_link` valid URL (jika diisi).
-  - `image_url` valid URL (jika diisi).
+  - `image` (Main Image) wajib saat Create (opsional saat Update).
+  - `images` (Gallery) opsional, dukung upload banyak file sekaligus.
+  - Tipe file wajib gambar (`jpg`, `jpeg`, `png`, `webp`).
   - `end_date >= start_date`.
 
 - Query list:
@@ -223,5 +241,8 @@ Setiap halaman data harus punya:
 - Update/delete user dan portfolio sekarang mengembalikan `404` jika ID tidak ada.
 - Query `page` dan `limit` pada endpoint public sekarang mengembalikan `400` jika invalid.
 - Dokumentasi endpoint user admin diseragamkan ke `/api/admin/users/:id`.
+- **Dukungan Galeri Gambar**: CRUD Portofolio kini menggunakan `multipart/form-data` untuk mendukung upload gambar (field `image` dan `images`).
+- **Keamanan File**: Backend sekarang memvalidasi tipe MIME dan ekstensi file gambar, serta memberikan nama unik (UUID) untuk mencegah konflik.
+- **Static Files**: Semua file yang di-upload dapat diakses melalui prefix URL `/uploads/`.
 
-Frontend wajib menyesuaikan handling error terhadap perubahan ini.
+Frontend wajib menyesuaikan handling error dan metode pengiriman data (Form Data) terhadap perubahan ini.

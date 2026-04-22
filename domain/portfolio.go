@@ -3,18 +3,27 @@ package domain
 import "time"
 
 type Portfolio struct {
+	ID          uint             `json:"id" gorm:"primaryKey" form:"id"`
+	Title       string           `json:"title" form:"title"`
+	Description string           `json:"description" form:"description"`
+	Role        string           `json:"role" form:"role"`
+	Type        string           `json:"type" form:"type"`
+	Industry    string           `json:"industry" form:"industry"`
+	TechStack   string           `json:"tech_stack" form:"tech_stack"`
+	ProjectLink string           `json:"project_link" form:"project_link"`
+	ImageURL    string           `json:"image_url" form:"image_url"` // Main thumbnail
+	Images      []PortfolioImage `json:"images" gorm:"foreignKey:PortfolioID;constraint:OnDelete:CASCADE"`
+	StartDate   time.Time        `json:"start_date" form:"start_date" time_format:"2006-01-02"`
+	EndDate     time.Time        `json:"end_date" form:"end_date" time_format:"2006-01-02"`
+	IsPublished bool             `json:"is_published" gorm:"default:true" form:"is_published"`
+	CreatedAt   time.Time        `json:"created_at"`
+	UpdatedAt   time.Time        `json:"updated_at"`
+}
+
+type PortfolioImage struct {
 	ID          uint      `json:"id" gorm:"primaryKey"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Role        string    `json:"role"`
-	Type        string    `json:"type"`
-	Industry    string    `json:"industry"`
-	TechStack   string    `json:"tech_stack"`
-	ProjectLink string    `json:"project_link"`
+	PortfolioID uint      `json:"portfolio_id"`
 	ImageURL    string    `json:"image_url"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
-	IsPublished bool      `json:"is_published" gorm:"default:true"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

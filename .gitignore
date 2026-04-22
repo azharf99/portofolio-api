@@ -2,3 +2,5 @@
 .env.local
 .env.production
 .env.staging
+server
+frontend-implementation.md

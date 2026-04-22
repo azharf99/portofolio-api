@@ -27,6 +27,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	api := r.Group("/api")
 
 	// === PUBLIC ROUTES ===
+	r.Static("/uploads", "./uploads")
 	api.POST("/login", userHandler.Login)
 	api.GET("/portfolios", portfolioHandler.Fetch)
 

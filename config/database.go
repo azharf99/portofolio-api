@@ -34,7 +34,7 @@ func SetupDatabase() *gorm.DB {
 	fmt.Println("Berhasil terhubung ke database PostgreSQL!")
 
 	// Migrasi tabel otomatis
-	err = db.AutoMigrate(&domain.Portfolio{}, &domain.User{})
+	err = db.AutoMigrate(&domain.Portfolio{}, &domain.User{}, &domain.PortfolioImage{})
 	if err != nil {
 		log.Fatal("Gagal melakukan migrasi database:", err)
 	}

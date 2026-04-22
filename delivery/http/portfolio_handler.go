@@ -1,11 +1,17 @@
 package http
 
 import (
+	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/azharf99/portofolio-api/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -67,9 +73,39 @@ func (h *PortfolioHandler) Fetch(c *gin.Context) {
 
 func (h *PortfolioHandler) Store(c *gin.Context) {
 	var portfolio domain.Portfolio
-	if err := c.ShouldBindJSON(&portfolio); err != nil {
+	// Gunakan ShouldBind agar bisa menangani JSON maupun Form Data
+	if err := c.ShouldBind(&portfolio); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Handle File Uploads
+	form, _ := c.MultipartForm()
+	if form != nil {
+		// 1. Handle Main Image (single)
+		if files := form.File["image"]; len(files) > 0 {
+			file := files[0]
+			path, err := h.saveUploadedFile(c, file)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			portfolio.ImageURL = path
+		}
+
+		// 2. Handle Gallery Images (multiple)
+		if files := form.File["images"]; len(files) > 0 {
+			var gallery []domain.PortfolioImage
+			for _, file := range files {
+				path, err := h.saveUploadedFile(c, file)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
+				gallery = append(gallery, domain.PortfolioImage{ImageURL: path})
+			}
+			portfolio.Images = gallery
+		}
 	}
 
 	if err := h.usecase.Store(&portfolio); err != nil {
@@ -78,6 +114,43 @@ func (h *PortfolioHandler) Store(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"data": portfolio, "message": "Portofolio berhasil ditambahkan"})
+}
+
+func (h *PortfolioHandler) saveUploadedFile(c *gin.Context, file *multipart.FileHeader) (string, error) {
+	// 1. Filter: Cek Ekstensi
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowedExt := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true}
+	if !allowedExt[ext] {
+		return "", fmt.Errorf("file %s tidak diizinkan. Hanya jpg, jpeg, png, webp", file.Filename)
+	}
+
+	// 2. Filter: Cek MIME Type (Deteksi konten berbahaya)
+	f, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	buffer := make([]byte, 512)
+	_, err = f.Read(buffer)
+	if err != nil && err != io.EOF {
+		return "", err
+	}
+	contentType := http.DetectContentType(buffer)
+	if !strings.HasPrefix(contentType, "image/") {
+		return "", fmt.Errorf("file %s bukan merupakan file gambar yang valid", file.Filename)
+	}
+
+	// 3. Cegah Konflik Nama: Gunakan UUID
+	filename := uuid.New().String() + ext
+	savePath := filepath.Join("uploads", "portfolios", filename)
+
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		return "", err
+	}
+
+	// Kembalikan URL path (misal: /uploads/portfolios/...)
+	return "/" + filepath.ToSlash(savePath), nil
 }
 
 func (h *PortfolioHandler) Update(c *gin.Context) {
@@ -89,9 +162,38 @@ func (h *PortfolioHandler) Update(c *gin.Context) {
 	}
 
 	var portfolio domain.Portfolio
-	if err := c.ShouldBindJSON(&portfolio); err != nil {
+	if err := c.ShouldBind(&portfolio); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Handle File Uploads
+	form, _ := c.MultipartForm()
+	if form != nil {
+		// 1. Handle Main Image (single)
+		if files := form.File["image"]; len(files) > 0 {
+			file := files[0]
+			path, err := h.saveUploadedFile(c, file)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			portfolio.ImageURL = path
+		}
+
+		// 2. Handle Gallery Images (multiple)
+		if files := form.File["images"]; len(files) > 0 {
+			var gallery []domain.PortfolioImage
+			for _, file := range files {
+				path, err := h.saveUploadedFile(c, file)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
+				gallery = append(gallery, domain.PortfolioImage{ImageURL: path})
+			}
+			portfolio.Images = gallery
+		}
 	}
 
 	if err := h.usecase.Update(uint(id), &portfolio); err != nil {
