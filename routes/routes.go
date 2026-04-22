@@ -36,6 +36,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	admin.Use(middleware.AuthMiddleware(jwtSecret))
 
 	// CRUD Portofolio Private
+	admin.GET("/portfolios", portfolioHandler.AdminFetch)
 	admin.POST("/portfolios", portfolioHandler.Store)
 	admin.PUT("/portfolios/:id", portfolioHandler.Update)
 	admin.DELETE("/portfolios/:id", portfolioHandler.Delete)

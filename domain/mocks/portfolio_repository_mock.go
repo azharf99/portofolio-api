@@ -9,8 +9,8 @@ type PortfolioRepositoryMock struct {
 	mock.Mock
 }
 
-func (m *PortfolioRepositoryMock) Fetch(limit, offset int, search, industry, pType string) ([]domain.Portfolio, int64, error) {
-	args := m.Called(limit, offset, search, industry, pType)
+func (m *PortfolioRepositoryMock) Fetch(limit, offset int, search, industry, pType string, onlyPublished bool) ([]domain.Portfolio, int64, error) {
+	args := m.Called(limit, offset, search, industry, pType, onlyPublished)
 	return args.Get(0).([]domain.Portfolio), args.Get(1).(int64), args.Error(2)
 }
 

@@ -14,11 +14,15 @@ func NewPortfolioRepository(db *gorm.DB) domain.PortfolioRepository {
 	return &portfolioRepository{db}
 }
 
-func (r *portfolioRepository) Fetch(limit, offset int, search, industry, pType string) ([]domain.Portfolio, int64, error) {
+func (r *portfolioRepository) Fetch(limit, offset int, search, industry, pType string, onlyPublished bool) ([]domain.Portfolio, int64, error) {
 	var portfolios []domain.Portfolio
 	var total int64
 
-	query := r.db.Model(&domain.Portfolio{}).Where("is_published = ?", true)
+	query := r.db.Model(&domain.Portfolio{})
+
+	if onlyPublished {
+		query = query.Where("is_published = ?", true)
+	}
 
 	if search != "" {
 		query = query.Where("title ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
@@ -31,7 +35,7 @@ func (r *portfolioRepository) Fetch(limit, offset int, search, industry, pType s
 	}
 
 	query.Count(&total)
-	err := query.Preload("Images").Offset(offset).Limit(limit).Find(&portfolios).Error
+	err := query.Preload("Images").Offset(offset).Limit(limit).Order("created_at DESC").Find(&portfolios).Error
 	return portfolios, total, err
 }
 
@@ -40,17 +44,16 @@ func (r *portfolioRepository) Store(portfolio *domain.Portfolio) error {
 }
 
 func (r *portfolioRepository) Update(id uint, portfolio *domain.Portfolio) error {
-	// Untuk update dengan asosiasi (Images), kita perlu menggunakan Save atau mengelola asosiasi secara manual
-	// Di sini kita gunakan Save untuk mempermudah sinkronisasi data termasuk Images
+	// 1. Cek apakah record ada
+	var existing domain.Portfolio
+	if err := r.db.First(&existing, id).Error; err != nil {
+		return err // gorm.ErrRecordNotFound if not found
+	}
+
+	// 2. Lakukan Update
+	// Kita gunakan Save untuk menyinkronkan seluruh field termasuk asosiasi Images
 	portfolio.ID = id
-	result := r.db.Save(portfolio)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-	return nil
+	return r.db.Save(portfolio).Error
 }
 
 func (r *portfolioRepository) Delete(id uint) error {

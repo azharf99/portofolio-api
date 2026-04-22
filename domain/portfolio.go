@@ -29,14 +29,14 @@ type PortfolioImage struct {
 }
 
 type PortfolioUsecase interface {
-	Fetch(page, limit int, search, industry, pType string) ([]Portfolio, int64, error)
+	Fetch(page, limit int, search, industry, pType string, onlyPublished bool) ([]Portfolio, int64, error)
 	Store(portfolio *Portfolio) error
 	Update(id uint, portfolio *Portfolio) error // BARU
 	Delete(id uint) error                       // BARU
 }
 
 type PortfolioRepository interface {
-	Fetch(limit, offset int, search, industry, pType string) ([]Portfolio, int64, error)
+	Fetch(limit, offset int, search, industry, pType string, onlyPublished bool) ([]Portfolio, int64, error)
 	Store(portfolio *Portfolio) error
 	Update(id uint, portfolio *Portfolio) error // BARU
 	Delete(id uint) error                       // BARU

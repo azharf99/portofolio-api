@@ -9,8 +9,8 @@ type PortfolioUsecaseMock struct {
 	mock.Mock
 }
 
-func (m *PortfolioUsecaseMock) Fetch(page, limit int, search, industry, pType string) ([]domain.Portfolio, int64, error) {
-	args := m.Called(page, limit, search, industry, pType)
+func (m *PortfolioUsecaseMock) Fetch(page, limit int, search, industry, pType string, onlyPublished bool) ([]domain.Portfolio, int64, error) {
+	args := m.Called(page, limit, search, industry, pType, onlyPublished)
 	return args.Get(0).([]domain.Portfolio), args.Get(1).(int64), args.Error(2)
 }
 

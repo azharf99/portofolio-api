@@ -32,8 +32,8 @@ func TestPortfolioHandler_Fetch(t *testing.T) {
 			{Title: "Sistem Keamanan Bank"},
 		}
 
-		// Harapannya: dipanggil dengan default page=1, limit=10
-		mockUsecase.On("Fetch", 1, 10, "", "", "").Return(mockData, int64(1), nil).Once()
+		// Harapannya: dipanggil dengan default page=1, limit=10, dan onlyPublished=true
+		mockUsecase.On("Fetch", 1, 10, "", "", "", true).Return(mockData, int64(1), nil).Once()
 
 		// Buat Request HTTP Palsu (menggunakan net/http bawaan)
 		req, _ := http.NewRequest("GET", "/portfolios", nil)

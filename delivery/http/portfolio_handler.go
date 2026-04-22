@@ -33,6 +33,14 @@ func NewPortfolioHandler(r *gin.RouterGroup, us domain.PortfolioUsecase) {
 }
 
 func (h *PortfolioHandler) Fetch(c *gin.Context) {
+	h.fetch(c, true)
+}
+
+func (h *PortfolioHandler) AdminFetch(c *gin.Context) {
+	h.fetch(c, false)
+}
+
+func (h *PortfolioHandler) fetch(c *gin.Context, onlyPublished bool) {
 	search := c.Query("search")
 	industry := c.Query("industry")
 	pType := c.Query("type")
@@ -57,7 +65,7 @@ func (h *PortfolioHandler) Fetch(c *gin.Context) {
 		return
 	}
 
-	portfolios, total, err := h.usecase.Fetch(page, limit, search, industry, pType)
+	portfolios, total, err := h.usecase.Fetch(page, limit, search, industry, pType, onlyPublished)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

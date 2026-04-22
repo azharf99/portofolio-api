@@ -10,7 +10,7 @@ func NewPortfolioUsecase(repo domain.PortfolioRepository) domain.PortfolioUsecas
 	return &portfolioUsecase{repo}
 }
 
-func (u *portfolioUsecase) Fetch(page, limit int, search, industry, pType string) ([]domain.Portfolio, int64, error) {
+func (u *portfolioUsecase) Fetch(page, limit int, search, industry, pType string, onlyPublished bool) ([]domain.Portfolio, int64, error) {
 	if page <= 0 {
 		page = 1
 	}
@@ -18,7 +18,7 @@ func (u *portfolioUsecase) Fetch(page, limit int, search, industry, pType string
 		limit = 10
 	}
 	offset := (page - 1) * limit
-	return u.repo.Fetch(limit, offset, search, industry, pType)
+	return u.repo.Fetch(limit, offset, search, industry, pType, onlyPublished)
 }
 
 func (u *portfolioUsecase) Store(portfolio *domain.Portfolio) error {

@@ -19,10 +19,10 @@ func TestPortfolioUsecase_Fetch(t *testing.T) {
 			{Title: "Web Keamanan", Industry: "Cybersecurity"},
 		}
 
-		// Ekspektasi: page 2, limit 10 -> offset harusnya 10
-		mockRepo.On("Fetch", 10, 10, "", "", "").Return(mockPortfolios, int64(1), nil).Once()
+		// Ekspektasi: page 2, limit 10 -> offset harusnya 10, onlyPublished true
+		mockRepo.On("Fetch", 10, 10, "", "", "", true).Return(mockPortfolios, int64(1), nil).Once()
 
-		res, total, err := mockUsecase.Fetch(2, 10, "", "", "")
+		res, total, err := mockUsecase.Fetch(2, 10, "", "", "", true)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, res)
