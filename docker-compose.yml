@@ -1,25 +1,25 @@
 services:
-  # SERVICE DB DIHAPUS SEPENUHNYA DARI SINI
 
   api:
     image: azharfa/portfolio-api-api:latest
     container_name: portfolio_api
     restart: always
     ports:
-      - "8081:8080" # BENTROK TERATASI: Host pakai 8081, Container tetap 8080
+      - "${PORT_HOST}:8080"
     environment:
-      # PENTING: Gunakan nama container DB dari Project 1 sebagai HOST
-      - DB_HOST=gothub_db 
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD} # Gunakan password database Project 1
-      - DB_NAME=${DB_NAME:-portofolio_db} # Arahkan ke database yang baru kita buat
-      - DB_PORT=5432
-      - PORT=8080
-      - JWT_SECRET=${JWT_SECRET:-kunci_rahasia_kamu}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
-      - GIN_MODE=release
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - GIN_MODE=${GIN_MODE}
 
-# Masukkan Project 2 ke jaringan yang sama dengan Project 1
+    volumes:
+      - ./uploads/portfolios:/app/uploads/portfolios
+
 networks:
   default:
     external: true
