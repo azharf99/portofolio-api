@@ -28,3 +28,8 @@ func (m *PortfolioUsecaseMock) Delete(id uint) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
+
+func (m *PortfolioUsecaseMock) CleanupOrphanedImages() error {
+	args := m.Called()
+	return args.Error(0)
+}

@@ -33,3 +33,7 @@ func (u *portfolioUsecase) Update(id uint, portfolio *domain.Portfolio) error {
 func (u *portfolioUsecase) Delete(id uint) error {
 	return u.repo.Delete(id)
 }
+
+func (u *portfolioUsecase) CleanupOrphanedImages() error {
+	return u.repo.CleanupOrphanedImages()
+}

@@ -4,3 +4,4 @@
 .env.staging
 server
 frontend-implementation.md
+*.exe

@@ -1,6 +1,10 @@
 package repository
 
 import (
+	"log"
+	"os"
+	"strings"
+
 	"github.com/azharf99/portofolio-api/domain"
 	"gorm.io/gorm"
 )
@@ -64,5 +68,42 @@ func (r *portfolioRepository) Delete(id uint) error {
 	if result.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
+	return nil
+}
+
+func (r *portfolioRepository) CleanupOrphanedImages() error {
+	// 1. Cek Main Image di tabel Portfolios
+	var portfolios []domain.Portfolio
+	if err := r.db.Find(&portfolios).Error; err != nil {
+		return err
+	}
+
+	for _, p := range portfolios {
+		if p.ImageURL != "" {
+			// Hilangkan leading slash jika ada (misal /uploads/... -> uploads/...)
+			filePath := strings.TrimPrefix(p.ImageURL, "/")
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				log.Printf("Cleaning up missing main image: %s for Portfolio ID: %d\n", p.ImageURL, p.ID)
+				r.db.Model(&p).Update("image_url", "")
+			}
+		}
+	}
+
+	// 2. Cek Gallery Images di tabel PortfolioImages
+	var galleryImages []domain.PortfolioImage
+	if err := r.db.Find(&galleryImages).Error; err != nil {
+		return err
+	}
+
+	for _, img := range galleryImages {
+		if img.ImageURL != "" {
+			filePath := strings.TrimPrefix(img.ImageURL, "/")
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				log.Printf("Deleting missing gallery image record: %s (ID: %d)\n", img.ImageURL, img.ID)
+				r.db.Delete(&img)
+			}
+		}
+	}
+
 	return nil
 }

@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"log"
+
 	"github.com/azharf99/portofolio-api/delivery/http"
 	"github.com/azharf99/portofolio-api/middleware"
 	"github.com/azharf99/portofolio-api/repository"
@@ -18,6 +20,11 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	// 2. Setup Usecase
 	portfolioUsecase := usecase.NewPortfolioUsecase(portfolioRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, jwtSecret)
+
+	// 3. Jalankan Cleanup Gambar yang hilang di disk (Opsional tapi berguna jika kontainer restart tanpa volume)
+	if err := portfolioUsecase.CleanupOrphanedImages(); err != nil {
+		log.Printf("Warning: Gagal melakukan cleanup gambar: %v\n", err)
+	}
 
 	// 3. Setup Handler (Controller)
 	portfolioHandler := http.NewPortfolioHandlerInstance(portfolioUsecase)

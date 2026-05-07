@@ -33,6 +33,7 @@ type PortfolioUsecase interface {
 	Store(portfolio *Portfolio) error
 	Update(id uint, portfolio *Portfolio) error // BARU
 	Delete(id uint) error                       // BARU
+	CleanupOrphanedImages() error               // BARU: Cek & hapus referensi gambar yang hilang di disk
 }
 
 type PortfolioRepository interface {
@@ -40,4 +41,5 @@ type PortfolioRepository interface {
 	Store(portfolio *Portfolio) error
 	Update(id uint, portfolio *Portfolio) error // BARU
 	Delete(id uint) error                       // BARU
+	CleanupOrphanedImages() error               // BARU: Cek & hapus referensi gambar yang hilang di disk
 }
