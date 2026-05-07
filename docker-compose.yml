@@ -5,13 +5,14 @@ services:
     container_name: portfolio_api
     restart: always
     ports:
-      - "${PORT_HOST}:8080"
+      - "${PORT}:${INTERNAL_PORT}"
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT}
+      - INTERNAL_PORT=${INTERNAL_PORT}
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
