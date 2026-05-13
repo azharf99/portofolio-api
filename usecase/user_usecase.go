@@ -21,12 +21,12 @@ func NewUserUsecase(repo domain.UserRepository, jwtSecret string) domain.UserUse
 func (u *userUsecase) Login(username, password string) (string, error) {
 	user, err := u.repo.GetByUsername(username)
 	if err != nil {
-		return "", errors.New("username atau password salah")
+		return "", errors.New("login_failed")
 	}
 
 	// Bandingkan password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", errors.New("username atau password salah")
+		return "", errors.New("login_failed")
 	}
 
 	// Buat JWT Token
@@ -43,7 +43,7 @@ func (u *userUsecase) Update(id uint, user *domain.User) error {
 	if user.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return errors.New("gagal mengenkripsi password baru")
+			return errors.New("internal_error")
 		}
 		user.Password = string(hashedPassword)
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/azharf99/portofolio-api/config"
 	"github.com/azharf99/portofolio-api/middleware"
+	"github.com/azharf99/portofolio-api/pkg/i18n"
 	"github.com/azharf99/portofolio-api/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,6 +16,7 @@ import (
 func main() {
 	// 1. Setup Database and Env
 	db := config.SetupDatabase()
+	i18n.Init() // Initialize i18n
 
 	err := godotenv.Load()
 	if err != nil {
@@ -34,6 +36,7 @@ func main() {
 	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.SetupCORS())
 	r.Use(middleware.RateLimiter())
+	r.Use(middleware.I18nMiddleware())
 
 	// 4. Setup Routing (Memanggil dari package routes)
 	routes.SetupRoutes(r, db, jwtSecret)

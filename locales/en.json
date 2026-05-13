@@ -1,0 +1,16 @@
+{
+  "login_failed": "invalid username or password",
+  "invalid_request": "invalid request",
+  "unauthorized": "unauthorized",
+  "internal_error": "internal server error",
+  "user_deleted": "user deleted successfully",
+  "user_updated": "user updated successfully",
+  "success": "success",
+  "page_numeric": "Query page must be a number",
+  "limit_numeric": "Query limit must be a number",
+  "page_positive": "Query page must be greater than 0",
+  "limit_positive": "Query limit must be greater than 0",
+  "portfolio_created": "portfolio created successfully",
+  "portfolio_updated": "portfolio updated successfully",
+  "portfolio_deleted": "portfolio deleted successfully"
+}

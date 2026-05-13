@@ -1,0 +1,16 @@
+{
+  "login_failed": "username atau password salah",
+  "invalid_request": "permintaan tidak valid",
+  "unauthorized": "tidak diizinkan",
+  "internal_error": "terjadi kesalahan internal",
+  "user_deleted": "pengguna berhasil dihapus",
+  "user_updated": "pengguna berhasil diperbarui",
+  "success": "berhasil",
+  "page_numeric": "Query page harus berupa angka",
+  "limit_numeric": "Query limit harus berupa angka",
+  "page_positive": "Query page harus lebih dari 0",
+  "limit_positive": "Query limit harus lebih dari 0",
+  "portfolio_created": "portofolio berhasil dibuat",
+  "portfolio_updated": "portofolio berhasil diperbarui",
+  "portfolio_deleted": "portofolio berhasil dihapus"
+}

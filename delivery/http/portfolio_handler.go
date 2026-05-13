@@ -10,8 +10,10 @@ import (
 	"strings"
 
 	"github.com/azharf99/portofolio-api/domain"
+	i18n_pkg "github.com/azharf99/portofolio-api/pkg/i18n"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gorm.io/gorm"
 )
 
@@ -41,33 +43,34 @@ func (h *PortfolioHandler) AdminFetch(c *gin.Context) {
 }
 
 func (h *PortfolioHandler) fetch(c *gin.Context, onlyPublished bool) {
+	localizer := c.MustGet("localizer").(*i18n.Localizer)
 	search := c.Query("search")
 	industry := c.Query("industry")
 	pType := c.Query("type")
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query page harus berupa angka"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "page_numeric")})
 		return
 	}
 
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query limit harus berupa angka"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "limit_numeric")})
 		return
 	}
 
 	if page <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query page harus lebih dari 0"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "page_positive")})
 		return
 	}
 	if limit <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query limit harus lebih dari 0"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "limit_positive")})
 		return
 	}
 
 	portfolios, total, err := h.usecase.Fetch(page, limit, search, industry, pType, onlyPublished)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 		return
 	}
 
@@ -80,10 +83,11 @@ func (h *PortfolioHandler) fetch(c *gin.Context, onlyPublished bool) {
 }
 
 func (h *PortfolioHandler) Store(c *gin.Context) {
+	localizer := c.MustGet("localizer").(*i18n.Localizer)
 	var portfolio domain.Portfolio
 	// Gunakan ShouldBind agar bisa menangani JSON maupun Form Data
 	if err := c.ShouldBind(&portfolio); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "invalid_request")})
 		return
 	}
 
@@ -95,7 +99,7 @@ func (h *PortfolioHandler) Store(c *gin.Context) {
 			file := files[0]
 			path, err := h.saveUploadedFile(c, file)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 				return
 			}
 			portfolio.ImageURL = path
@@ -107,7 +111,7 @@ func (h *PortfolioHandler) Store(c *gin.Context) {
 			for _, file := range files {
 				path, err := h.saveUploadedFile(c, file)
 				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 					return
 				}
 				gallery = append(gallery, domain.PortfolioImage{ImageURL: path})
@@ -117,11 +121,11 @@ func (h *PortfolioHandler) Store(c *gin.Context) {
 	}
 
 	if err := h.usecase.Store(&portfolio); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": portfolio, "message": "Portofolio berhasil ditambahkan"})
+	c.JSON(http.StatusCreated, gin.H{"data": portfolio, "message": i18n_pkg.T(localizer, "portfolio_created")})
 }
 
 func (h *PortfolioHandler) saveUploadedFile(c *gin.Context, file *multipart.FileHeader) (string, error) {
@@ -162,16 +166,17 @@ func (h *PortfolioHandler) saveUploadedFile(c *gin.Context, file *multipart.File
 }
 
 func (h *PortfolioHandler) Update(c *gin.Context) {
+	localizer := c.MustGet("localizer").(*i18n.Localizer)
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID tidak valid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "invalid_request")})
 		return
 	}
 
 	var portfolio domain.Portfolio
 	if err := c.ShouldBind(&portfolio); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "invalid_request")})
 		return
 	}
 
@@ -183,7 +188,7 @@ func (h *PortfolioHandler) Update(c *gin.Context) {
 			file := files[0]
 			path, err := h.saveUploadedFile(c, file)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 				return
 			}
 			portfolio.ImageURL = path
@@ -195,7 +200,7 @@ func (h *PortfolioHandler) Update(c *gin.Context) {
 			for _, file := range files {
 				path, err := h.saveUploadedFile(c, file)
 				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 					return
 				}
 				gallery = append(gallery, domain.PortfolioImage{ImageURL: path})
@@ -206,32 +211,33 @@ func (h *PortfolioHandler) Update(c *gin.Context) {
 
 	if err := h.usecase.Update(uint(id), &portfolio); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Portofolio tidak ditemukan"})
+			c.JSON(http.StatusNotFound, gin.H{"error": i18n_pkg.T(localizer, "invalid_request")})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Portofolio berhasil diperbarui"})
+	c.JSON(http.StatusOK, gin.H{"message": i18n_pkg.T(localizer, "portfolio_updated")})
 }
 
 func (h *PortfolioHandler) Delete(c *gin.Context) {
+	localizer := c.MustGet("localizer").(*i18n.Localizer)
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID tidak valid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": i18n_pkg.T(localizer, "invalid_request")})
 		return
 	}
 
 	if err := h.usecase.Delete(uint(id)); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Portofolio tidak ditemukan"})
+			c.JSON(http.StatusNotFound, gin.H{"error": i18n_pkg.T(localizer, "invalid_request")})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": i18n_pkg.T(localizer, "internal_error")})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Portofolio berhasil dihapus"})
+	c.JSON(http.StatusOK, gin.H{"message": i18n_pkg.T(localizer, "portfolio_deleted")})
 }
