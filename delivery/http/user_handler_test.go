@@ -10,15 +10,19 @@ import (
 	apiHttp "github.com/azharf99/portofolio-api/delivery/http"
 	"github.com/azharf99/portofolio-api/domain"
 	"github.com/azharf99/portofolio-api/domain/mocks"
+	"github.com/azharf99/portofolio-api/middleware"
+	"github.com/azharf99/portofolio-api/pkg/i18n"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUserHandler_Login(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	i18n.Init()
 
 	mockUsecase := new(mocks.UserUsecaseMock)
 	r := gin.Default()
+	r.Use(middleware.I18nMiddleware())
 	uH := apiHttp.NewUserHandlerInstance(mockUsecase)
 	r.POST("/login", uH.Login)
 
@@ -52,9 +56,11 @@ func TestUserHandler_Login(t *testing.T) {
 
 func TestUserHandler_Update(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	i18n.Init()
 
 	mockUsecase := new(mocks.UserUsecaseMock)
 	r := gin.Default()
+	r.Use(middleware.I18nMiddleware())
 	uH := apiHttp.NewUserHandlerInstance(mockUsecase)
 	r.PUT("/users/:id", uH.Update)
 
@@ -77,9 +83,11 @@ func TestUserHandler_Update(t *testing.T) {
 
 func TestUserHandler_Delete(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	i18n.Init()
 
 	mockUsecase := new(mocks.UserUsecaseMock)
 	r := gin.Default()
+	r.Use(middleware.I18nMiddleware())
 	uH := apiHttp.NewUserHandlerInstance(mockUsecase)
 	r.DELETE("/users/:id", uH.Delete)
 

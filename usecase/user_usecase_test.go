@@ -51,7 +51,7 @@ func TestUserUsecase_Login(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Empty(t, token)
-		assert.Equal(t, "username atau password salah", err.Error())
+		assert.Equal(t, "login_failed", err.Error())
 
 		mockRepo.AssertExpectations(t)
 	})

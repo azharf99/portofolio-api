@@ -10,6 +10,8 @@ import (
 	apiHttp "github.com/azharf99/portofolio-api/delivery/http"
 	"github.com/azharf99/portofolio-api/domain"
 	"github.com/azharf99/portofolio-api/domain/mocks"
+	"github.com/azharf99/portofolio-api/middleware"
+	"github.com/azharf99/portofolio-api/pkg/i18n"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,10 +20,14 @@ func TestPortfolioHandler_Fetch(t *testing.T) {
 	// Set Gin ke mode test agar log tidak berisik
 	gin.SetMode(gin.TestMode)
 
+	// Inisialisasi i18n untuk test
+	i18n.Init()
+
 	mockUsecase := new(mocks.PortfolioUsecaseMock)
 
 	// Setup Router Gin Palsu
 	r := gin.Default()
+	r.Use(middleware.I18nMiddleware())
 
 	// Gunakan alias apiHttp yang baru kita buat
 	pH := apiHttp.NewPortfolioHandlerInstance(mockUsecase)
