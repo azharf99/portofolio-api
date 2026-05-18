@@ -1,105 +1,113 @@
-# 🚀 Portofolio API
+# Portofolio API
 
-Sebuah RESTful API tangguh dan aman yang dibangun menggunakan **Golang** untuk mengelola data portofolio profesional. Proyek ini menerapkan prinsip **Clean Architecture** dan praktik terbaik *Cybersecurity* untuk memastikan skalabilitas, kemudahan *testing*, dan keamanan data.
+[![Go Report Card](https://goreportcard.com/badge/github.com/azharf99/portofolio-api)](https://goreportcard.com/report/github.com/azharf99/portofolio-api)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## 🌟 Fitur Utama
+Portofolio API adalah backend service yang dibangun menggunakan bahasa pemrograman Go dengan prinsip **Clean Architecture**. API ini dirancang untuk mengelola data portofolio profesional, lengkap dengan fitur autentikasi, manajemen gambar, dan dukungan multibahasa (i18n).
 
-- **Clean Architecture**: Kode dipisahkan menjadi layer `Domain`, `Repository`, `Usecase`, dan `Delivery` agar mudah di- *maintenance* dan diuji.
-- **Autentikasi Aman**: Menggunakan **JWT (JSON Web Tokens)** untuk perlindungan *route* *private* dan **Bcrypt** untuk *hashing password*.
-- **Security First**: Dilengkapi dengan *Middleware Security Headers* (mencegah XSS, Clickjacking) dan konfigurasi CORS yang ketat.
-- **Fitur Lengkap CRUD Portofolio**: Mendukung penambahan, pembaruan, penghapusan, dan pengambilan data.
-- **Advanced Fetching**: Mendukung fitur *Searching*, *Filtering* (berdasarkan tipe dan industri), serta *Pagination* bawaan pada *endpoint public*.
-- **Database Relasional**: Menggunakan **PostgreSQL** yang diintegrasikan dengan **GORM** (mencegah SQL Injection).
-- **Dockerized**: Siap untuk di-*deploy* menggunakan Docker dan Docker Compose.
-- **Unit Testing**: Dilengkapi dengan *unit test* standar industri menggunakan *Mocking* (`testify`) untuk mencapai *code coverage* yang tinggi.
+## 🚀 Fitur Utama
+
+- **Clean Architecture**: Pemisahan tanggung jawab yang jelas antara Domain, Usecase, Repository, dan Delivery.
+- **Autentikasi JWT**: Keamanan akses admin menggunakan JSON Web Token.
+- **Multibahasa (i18n)**: Dukungan pesan respons dalam bahasa Inggris (en), Indonesia (id), dan Rusia (ru).
+- **Manajemen Portofolio**: CRUD lengkap termasuk fitur unggah gambar dan manajemen tech stack.
+- **Keamanan**:
+    - **Rate Limiting**: Perlindungan dari serangan brute-force atau spamming.
+    - **Security Headers**: Implementasi header keamanan standar (XSS Protection, HSTS, dll).
+    - **CORS**: Pengaturan Cross-Origin Resource Sharing yang fleksibel.
+- **Database**: PostgreSQL dengan GORM untuk manajemen database yang handal.
+- **Docker Ready**: Siap dijalankan di lingkungan kontainer menggunakan Docker & Docker Compose.
+- **CI/CD**: Workflow GitHub Actions untuk pengujian otomatis.
 
 ## 🛠️ Tech Stack
 
-- **Bahasa**: Go (Golang)
-- **Framework Web**: [Gin Gonic](https://gin-gonic.com/)
+- **Language**: Go (Golang) 1.26.1
+- **Web Framework**: [Gin Gonic](https://gin-gonic.com/)
 - **ORM**: [GORM](https://gorm.io/)
 - **Database**: PostgreSQL
-- **Security**: `golang-jwt`, `bcrypt`
-- **Testing**: `testify`
-- **Containerization**: Docker, Docker Compose
+- **Auth**: JWT (JSON Web Token)
+- **i18n**: go-i18n
+- **Tools**: Docker, Docker Compose
 
-## 📁 Struktur Direktori (Clean Architecture)
+## 📋 Struktur Proyek
 
 ```text
-.
-├── config/           # Setup database & koneksi
-├── delivery/         # Layer HTTP Controller (Gin Handlers)
-├── domain/           # Entitas inti (Struct) dan Interface (Kontrak)
-│   └── mocks/        # File mock untuk Unit Testing
-├── middleware/       # JWT Auth, CORS, dan Security Headers
-├── repository/       # Interaksi langsung ke database (GORM)
-├── routes/           # Registrasi semua endpoint API
-├── usecase/          # Layer logika bisnis
-├── Dockerfile        # Konfigurasi image aplikasi
-├── docker-compose.yml# Orkestrasi Database dan API
-└── main.go           # Titik masuk aplikasi (Entry Point)
+├── config/             # Konfigurasi database dan env
+├── delivery/           # Layer delivery (HTTP Handlers)
+├── domain/             # Layer entitas dan interface
+├── locales/            # File translasi i18n (JSON)
+├── middleware/         # Middleware (Auth, i18n, Security)
+├── pkg/                # Package utilitas (i18n helper)
+├── repository/         # Layer akses database
+├── routes/             # Definisi rute API
+├── usecase/            # Layer logika bisnis
+└── main.go             # Entry point aplikasi
 ```
 
-## 🚀 Cara Menjalankan Aplikasi
-- Persyaratan SistemGo (v1.21 atau lebih baru)
-- Docker & Docker Compose
+## ⚙️ Instalasi & Penggunaan
 
-# 1. Menjalankan via Docker (Direkomendasikan)
-Cara termudah untuk menjalankan API beserta databasenya adalah menggunakan Docker Compose.
+### Menggunakan Docker (Rekomendasi)
 
-**Clone repository**
-```bash
-git clone https://github.com/azharf99/portofolio-api.git
-cd portofolio-api
-```
+1. Clone repository:
+   ```bash
+   git clone https://github.com/azharf99/portofolio-api.git
+   cd portofolio-api
+   ```
 
-**Jalankan container di background**
-```bash
-docker-compose up -d --build
-```
+2. Salin file `.env.example` ke `.env` dan sesuaikan konfigurasinya:
+   ```bash
+   cp .env.example .env
+   ```
 
-**Cek log aplikasi untuk memastikan berjalan lancar**
-```bash
-docker-compose logs -f api
-```
+3. Jalankan aplikasi menggunakan Docker Compose:
+   ```bash
+   docker-compose up -d --build
+   ```
 
-**Aplikasi akan berjalan di http://localhost:8080.**
+4. API akan berjalan di `http://localhost:8080`.
 
-# 2. Menjalankan Unit Test
+### Tanpa Docker
 
-Proyek ini mengutamakan kualitas kode. Untuk menjalankan unit test dan melihat code coverage:
+1. Pastikan Anda memiliki Go 1.26.1+ dan PostgreSQL yang sedang berjalan.
+2. Buat database di PostgreSQL.
+3. Atur environment variables di file `.env`.
+4. Jalankan aplikasi:
+   ```bash
+   go run main.go
+   ```
 
-**Download semua dependency**
-```bash
-go mod tidy
-```
+## 🔐 Akun Admin Default
 
-**Jalankan seluruh test**
-```bash
-go test ./... -cover
-```
+Saat pertama kali dijalankan, sistem akan otomatis membuat akun admin (seed):
+- **Username**: `azharfa`
+- **Password**: `admin123`
 
-## 📡 Dokumentasi API (Endpoints)
+*Sangat disarankan untuk mengubah password segera setelah login pertama kali.*
 
-# Public Routes (Tidak butuh token)
+## 🛣️ API Endpoints
 
-| Method | Endpoint | Deskripsi | Query Params (Opsional) |
-| POST | /api/login | Login admin (Mendapatkan JWT) | - |
-| GET | /api/portfolios | Mengambil data portofolio | page, limit, search, industry, type |
+### Public Routes
+- `POST /api/login` - Login admin untuk mendapatkan token JWT.
+- `GET /api/portfolios` - Mengambil daftar portofolio yang dipublikasikan.
+- `GET /uploads/*` - Mengakses file gambar statis.
 
-# Private Routes (Butuh Header Authorization: Bearer <token>)
+### Admin Routes (Protected by JWT)
+- `GET /api/admin/portfolios` - Daftar semua portofolio (termasuk yang belum dipublikasikan).
+- `POST /api/admin/portfolios` - Menambah portofolio baru.
+- `PUT /api/admin/portfolios/:id` - Memperbarui data portofolio.
+- `DELETE /api/admin/portfolios/:id` - Menghapus portofolio.
+- `PUT /api/admin/users/:id` - Memperbarui data user/admin.
+- `DELETE /api/admin/users/:id` - Menghapus user/admin.
 
-| Method | Endpoint | Deskripsi |
-| POST | /api/admin/portfolios | Menambahkan portofolio baru |
-| PUT | /api/admin/portfolios/:id | Memperbarui data portofolio |
-| DELETE | /api/admin/portfolios/:id | Menghapus portofolio |
-| PUT | /api/admin/users/:id | Memperbarui data user |
-| DELETE | /api/admin/users/:id | Menghapus user |
+## 📜 Lisensi & Atribusi
 
-## 🔒 Variabel Lingkungan (Environment Variables)
+Proyek ini dilisensikan di bawah **Apache License 2.0**.
 
-Aplikasi ini membaca konfigurasi dari environment variables. Saat menggunakan Docker Compose, ini sudah diatur secara otomatis. Jika menjalankan secara lokal, Anda bisa mengatur:
-`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT`, `JWT_SECRET` (Sangat disarankan untuk diganti di lingkungan produksi), `GIN_MODE` (Set ke release saat deployment)
+### Syarat Penggunaan (Atribusi)
+Sesuai dengan keinginan pengembang asli, **setiap individu atau organisasi yang menggunakan, memodifikasi, atau mendistribusikan ulang kode ini WAJIB mencantumkan atribusi kepada pengembang asli**:
 
+**Azhar Faturohman Ahidin**  
+GitHub: [azharf99](https://github.com/azharf99)
 
-**Dibuat dengan ❤️ oleh azharf99**
+---
+Dibuat dengan ❤️ oleh [Azhar Faturohman Ahidin](https://github.com/azharf99)
