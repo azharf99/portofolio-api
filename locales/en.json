@@ -12,5 +12,8 @@
   "limit_positive": "Query limit must be greater than 0",
   "portfolio_created": "portfolio created successfully",
   "portfolio_updated": "portfolio updated successfully",
-  "portfolio_deleted": "portfolio deleted successfully"
+  "portfolio_deleted": "portfolio deleted successfully",
+  "service_created": "service created successfully",
+  "service_updated": "service updated successfully",
+  "service_deleted": "service deleted successfully"
 }

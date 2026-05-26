@@ -12,5 +12,8 @@
   "limit_positive": "Query limit harus lebih dari 0",
   "portfolio_created": "portofolio berhasil dibuat",
   "portfolio_updated": "portofolio berhasil diperbarui",
-  "portfolio_deleted": "portofolio berhasil dihapus"
+  "portfolio_deleted": "portofolio berhasil dihapus",
+  "service_created": "layanan berhasil dibuat",
+  "service_updated": "layanan berhasil diperbarui",
+  "service_deleted": "layanan berhasil dihapus"
 }
