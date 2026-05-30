@@ -17,6 +17,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - GIN_MODE=${GIN_MODE}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+      - PAYMENT_GATEWAY_URL=${PAYMENT_GATEWAY_URL}
+      - PAYMENT_GATEWAY_API_KEY=${PAYMENT_GATEWAY_API_KEY}
 
     volumes:
       - ./uploads/portfolios:/app/uploads/portfolios
