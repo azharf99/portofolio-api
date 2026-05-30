@@ -22,6 +22,7 @@ WORKDIR /app
 
 # Salin binary dari stage builder ke stage final ini
 COPY --from=builder /app/portfolio-api .
+COPY --from=builder /app/locales ./locales
 
 # Buka port 8080
 EXPOSE 8080
