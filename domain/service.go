@@ -17,6 +17,7 @@ type Service struct {
 
 type ServiceUsecase interface {
 	Fetch(page, limit int, activeOnly bool) ([]Service, int64, error)
+	GetByID(id uint) (*Service, error)
 	Store(service *Service) error
 	Update(id uint, service *Service) error
 	Delete(id uint) error
@@ -24,6 +25,7 @@ type ServiceUsecase interface {
 
 type ServiceRepository interface {
 	Fetch(limit, offset int, activeOnly bool) ([]Service, int64, error)
+	GetByID(id uint) (*Service, error)
 	Store(service *Service) error
 	Update(id uint, service *Service) error
 	Delete(id uint) error

@@ -28,6 +28,15 @@ func (r *serviceRepository) Fetch(limit, offset int, activeOnly bool) ([]domain.
 	return services, total, err
 }
 
+func (r *serviceRepository) GetByID(id uint) (*domain.Service, error) {
+	var service domain.Service
+	err := r.db.First(&service, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &service, nil
+}
+
 func (r *serviceRepository) Store(service *domain.Service) error {
 	return r.db.Create(service).Error
 }

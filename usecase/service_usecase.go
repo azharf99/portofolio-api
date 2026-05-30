@@ -21,6 +21,10 @@ func (u *serviceUsecase) Fetch(page, limit int, activeOnly bool) ([]domain.Servi
 	return u.repo.Fetch(limit, offset, activeOnly)
 }
 
+func (u *serviceUsecase) GetByID(id uint) (*domain.Service, error) {
+	return u.repo.GetByID(id)
+}
+
 func (u *serviceUsecase) Store(service *domain.Service) error {
 	return u.repo.Store(service)
 }

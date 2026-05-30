@@ -22,11 +22,13 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	portfolioRepo := repository.NewPortfolioRepository(db)
 	userRepo := repository.NewUserRepository(db)
 	serviceRepo := repository.NewServiceRepository(db)
+	transactionRepo := repository.NewTransactionRepository(db)
 
 	// 2. Setup Usecase
 	portfolioUsecase := usecase.NewPortfolioUsecase(portfolioRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, jwtSecret)
 	serviceUsecase := usecase.NewServiceUsecase(serviceRepo)
+	transactionUsecase := usecase.NewTransactionUsecase(transactionRepo, serviceRepo)
 
 	// 3. Jalankan Cleanup Gambar yang hilang di disk (Opsional tapi berguna jika kontainer restart tanpa volume)
 	if err := portfolioUsecase.CleanupOrphanedImages(); err != nil {
@@ -37,6 +39,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	portfolioHandler := http.NewPortfolioHandlerInstance(portfolioUsecase)
 	userHandler := http.NewUserHandlerInstance(userUsecase)
 	serviceHandler := http.NewServiceHandlerInstance(serviceUsecase)
+	transactionHandler := http.NewTransactionHandlerInstance(transactionUsecase)
 
 	// 4. Daftarkan Rute
 	api := r.Group("/api")
@@ -46,6 +49,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	api.POST("/login", userHandler.Login)
 	api.GET("/portfolios", portfolioHandler.Fetch)
 	api.GET("/services", serviceHandler.Fetch)
+	api.POST("/checkout", transactionHandler.Checkout)
+	api.POST("/webhook/payment", transactionHandler.Webhook)
+	api.GET("/transactions/history", transactionHandler.FetchHistory)
 
 	// === PRIVATE ROUTES (Butuh Login) ===
 	admin := api.Group("/admin")
