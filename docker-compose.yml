@@ -23,6 +23,7 @@ services:
 
     volumes:
       - ./uploads/portfolios:/app/uploads/portfolios
+      - ./uploads/services:/app/uploads/services
 
 networks:
   default:
