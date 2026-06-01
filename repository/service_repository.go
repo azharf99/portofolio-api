@@ -24,7 +24,7 @@ func (r *serviceRepository) Fetch(limit, offset int, activeOnly bool) ([]domain.
 	}
 
 	query.Count(&total)
-	err := query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&services).Error
+	err := query.Offset(offset).Limit(limit).Order("title ASC").Find(&services).Error
 	return services, total, err
 }
 

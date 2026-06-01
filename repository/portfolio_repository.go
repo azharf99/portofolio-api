@@ -39,7 +39,7 @@ func (r *portfolioRepository) Fetch(limit, offset int, search, industry, pType s
 	}
 
 	query.Count(&total)
-	err := query.Preload("Images").Offset(offset).Limit(limit).Order("created_at DESC").Find(&portfolios).Error
+	err := query.Preload("Images").Offset(offset).Limit(limit).Order("end_date DESC").Find(&portfolios).Error
 	return portfolios, total, err
 }
 
