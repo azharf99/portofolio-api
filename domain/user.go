@@ -5,7 +5,9 @@ import "time"
 type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	Username  string    `json:"username" gorm:"unique"`
-	Password  string    `json:"password"`
+	// KEAMANAN: json:"-" memastikan hash password TIDAK PERNAH ikut ter-serialize
+	// ke response API manapun, sekarang ataupun di masa depan.
+	Password  string    `json:"-"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

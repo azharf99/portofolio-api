@@ -78,16 +78,17 @@ Portofolio API adalah backend service yang dibangun menggunakan bahasa pemrogram
 
 ## 🔐 Akun Admin Default
 
-Saat pertama kali dijalankan, sistem akan otomatis membuat akun admin (seed):
-- **Username**: `azharfa`
-- **Password**: `admin123`
-
-*Sangat disarankan untuk mengubah password segera setelah login pertama kali.*
+Saat pertama kali dijalankan (database kosong), sistem akan membuat SATU akun admin dari
+env var `ADMIN_USERNAME` dan `ADMIN_PASSWORD`. **Kedua env var ini wajib diisi** —
+aplikasi akan gagal start jika kosong, sama seperti `JWT_SECRET`. Password minimal 12
+karakter. Tidak ada default hardcoded lagi — pilih kredensial Anda sendiri sebelum
+menjalankan API di lingkungan manapun yang bisa diakses publik.
 
 ## 🛣️ API Endpoints
 
 ### Public Routes
-- `POST /api/login` - Login admin untuk mendapatkan token JWT.
+- `POST /api/login` - Login admin. Token JWT dikirim sebagai cookie httpOnly (`auth_token`), bukan di body response.
+- `POST /api/logout` - Menghapus cookie auth.
 - `GET /api/portfolios` - Mengambil daftar portofolio yang dipublikasikan.
 - `GET /uploads/*` - Mengakses file gambar statis.
 
