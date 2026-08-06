@@ -47,11 +47,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, jwtSecret string) {
 	// === PUBLIC ROUTES ===
 	r.Static("/uploads", "./uploads")
 	api.POST("/login", userHandler.Login)
+	api.POST("/logout", userHandler.Logout)
 	api.GET("/portfolios", portfolioHandler.Fetch)
 	api.GET("/services", serviceHandler.Fetch)
 	api.POST("/checkout", transactionHandler.Checkout)
 	api.POST("/webhook/payment", transactionHandler.Webhook)
-	api.GET("/transactions/history", transactionHandler.FetchHistory)
+	// KEAMANAN: endpoint ini rawan enumerasi (siapa saja bisa mencoba banyak email),
+	// jadi diberi rate limit jauh lebih ketat daripada limiter global.
+	api.GET("/transactions/history", middleware.HistoryRateLimiter(), transactionHandler.FetchHistory)
 
 	// === PRIVATE ROUTES (Butuh Login) ===
 	admin := api.Group("/admin")

@@ -50,13 +50,29 @@ func seedAdmin(db *gorm.DB) {
 	db.Model(&domain.User{}).Count(&count)
 
 	if count == 0 {
-		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+		// KEAMANAN: Jangan pernah hardcode username/password default (mis. admin123).
+		// Wajib diisi eksplisit lewat env, sama seperti JWT_SECRET, agar operator
+		// sadar membuat kredensial sendiri sebelum API ini live.
+		username := os.Getenv("ADMIN_USERNAME")
+		password := os.Getenv("ADMIN_PASSWORD")
+		if username == "" || password == "" {
+			log.Fatal("ADMIN_USERNAME dan ADMIN_PASSWORD wajib diisi di env untuk membuat akun admin pertama kali")
+		}
+		if len(password) < 12 {
+			log.Fatal("ADMIN_PASSWORD wajib minimal 12 karakter")
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			log.Fatal("Gagal melakukan hashing password admin:", err)
+		}
 		admin := domain.User{
-			Username: "azharfa",
+			Username: username,
 			Password: string(hashedPassword),
 		}
 		db.Create(&admin)
-		log.Println("User admin berhasil dibuat! Username: azharfa | Password: admin123")
+		// KEAMANAN: Jangan log password, bahkan yang sudah di-hash, ke stdout/aggregator log.
+		log.Printf("User admin '%s' berhasil dibuat.\n", username)
 	}
 }
 

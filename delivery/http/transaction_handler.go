@@ -1,8 +1,10 @@
 package http
 
 import (
+	"crypto/subtle"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/azharf99/portofolio-api/domain"
 	i18n_pkg "github.com/azharf99/portofolio-api/pkg/i18n"
@@ -56,7 +58,11 @@ func (h *TransactionHandler) Webhook(c *gin.Context) {
 	apiKey := c.GetHeader("X-API-Key")
 	expectedKey := os.Getenv("PAYMENT_GATEWAY_API_KEY")
 
-	if expectedKey == "" || apiKey != expectedKey {
+	// KEAMANAN: bandingkan API key dengan waktu konstan (subtle.ConstantTimeCompare)
+	// supaya tidak bocor lewat timing side-channel. Perbandingan `!=` biasa membandingkan
+	// byte demi byte dan berhenti di ketidakcocokan pertama, yang secara teori bisa
+	// dipakai menebak key karakter demi karakter dari selisih waktu respons.
+	if expectedKey == "" || subtle.ConstantTimeCompare([]byte(apiKey), []byte(expectedKey)) != 1 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized webhook source"})
 		return
 	}
@@ -76,6 +82,41 @@ func (h *TransactionHandler) Webhook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Webhook processed successfully"})
 }
 
+// PublicTransactionView adalah proyeksi terbatas dari domain.Transaction untuk
+// endpoint publik /transactions/history.
+//
+// KEAMANAN: Endpoint ini di-lookup by email tanpa autentikasi (fitur "cek status
+// pesanan saya"), sehingga rawan enumerasi. Data sensitif seperti customer_name dan
+// customer_phone SENGAJA tidak disertakan agar dampak enumerasi/scraping minimal —
+// penyerang paling banter hanya mendapat status & nominal transaksi, bukan PII.
+// Dikombinasikan dengan HistoryRateLimiter di level route.
+type PublicTransactionView struct {
+	OrderID           string    `json:"order_id"`
+	ServiceTitle      string    `json:"service_title"`
+	GrossAmount       int64     `json:"gross_amount"`
+	TransactionStatus string    `json:"transaction_status"`
+	PaymentType       string    `json:"payment_type"`
+	PaymentURL        string    `json:"payment_url,omitempty"`
+	CreatedAt         time.Time `json:"created_at"`
+}
+
+func toPublicTransactionView(tx domain.Transaction) PublicTransactionView {
+	view := PublicTransactionView{
+		OrderID:           tx.OrderID,
+		ServiceTitle:      tx.Service.Title,
+		GrossAmount:       tx.GrossAmount,
+		TransactionStatus: tx.TransactionStatus,
+		PaymentType:       tx.PaymentType,
+		CreatedAt:         tx.CreatedAt,
+	}
+	// Hanya ekspos payment_url selagi masih actionable (pending) — begitu selesai/gagal,
+	// link tersebut tidak diperlukan lagi oleh frontend.
+	if tx.TransactionStatus == "pending" {
+		view.PaymentURL = tx.PaymentURL
+	}
+	return view
+}
+
 func (h *TransactionHandler) FetchHistory(c *gin.Context) {
 	localizer := c.MustGet("localizer").(*i18n.Localizer)
 	email := c.Query("email")
@@ -90,8 +131,13 @@ func (h *TransactionHandler) FetchHistory(c *gin.Context) {
 		return
 	}
 
+	views := make([]PublicTransactionView, 0, len(txs))
+	for _, tx := range txs {
+		views = append(views, toPublicTransactionView(tx))
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"data":    txs,
+		"data":    views,
 		"message": i18n_pkg.T(localizer, "success"),
 	})
 }

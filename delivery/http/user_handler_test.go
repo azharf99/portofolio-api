@@ -46,9 +46,22 @@ func TestUserHandler_Login(t *testing.T) {
 
 		assert.Equal(t, 200, w.Code)
 
+		// Token TIDAK boleh muncul di body JSON (harus lewat cookie httpOnly saja).
 		var response map[string]interface{}
 		json.Unmarshal(w.Body.Bytes(), &response)
-		assert.Equal(t, mockToken, response["token"])
+		assert.NotContains(t, response, "token")
+
+		// Token harus ada di cookie httpOnly bernama middleware.AuthCookieName.
+		var authCookie *http.Cookie
+		for _, c := range w.Result().Cookies() {
+			if c.Name == middleware.AuthCookieName {
+				authCookie = c
+			}
+		}
+		if assert.NotNil(t, authCookie, "expected httpOnly auth cookie to be set") {
+			assert.Equal(t, mockToken, authCookie.Value)
+			assert.True(t, authCookie.HttpOnly)
+		}
 
 		mockUsecase.AssertExpectations(t)
 	})
