@@ -76,6 +76,12 @@ func seedAdmin(db *gorm.DB) {
 	}
 }
 
+// seedServices membuat 3 paket bundle (bukan lagi item satuan) — dikelompokkan
+// per jenis bisnis sesuai arah baru: UMKM (kafe/resto), Sekolah, dan Enterprise.
+// Setiap bundle menyertakan WhatsApp Gateway sebagai fitur default.
+// Paket Sekolah sengaja diberi harga 0 (custom quote) — frontend menampilkan
+// "Custom quote" dan mengarahkan CTA ke RedirectURL (WhatsApp) alih-alih ke
+// alur checkout/pembayaran ketika kedua harga bernilai 0.
 func seedServices(db *gorm.DB) {
 	var count int64
 	db.Model(&domain.Service{}).Count(&count)
@@ -83,37 +89,39 @@ func seedServices(db *gorm.DB) {
 	if count == 0 {
 		services := []domain.Service{
 			{
-				Title:         "Landing Page Development",
-				Description:   "Create a premium, high-converting responsive landing page tailored for your business needs.",
-				OriginalPrice: 500000,
-				PromoPrice:    300000,
-				ImageURL:      "",
-				RedirectURL:   "https://wa.me/6285702570200?text=Hello%2C%20I%20am%20interested%20in%20your%20Landing%20Page%20Development%20service",
-				IsActive:      true,
-			},
-			{
-				Title:         "Point of Sales (POS) System",
-				Description:   "A complete retail/restaurant POS system with inventory tracking, sales reports, and receipt printing.",
+				Title:         "Paket UMKM — Kafe & Restoran",
+				Description:   "Sistem POS lengkap dengan manajemen stok dan laporan penjualan, landing page 1 halaman untuk kehadiran online, dan integrasi WhatsApp Gateway untuk notifikasi pesanan otomatis — siap dipakai sejak hari pertama.",
+				Features:      "Sistem POS dengan manajemen stok,Cetak struk otomatis,Landing page bisnis 1 halaman,Integrasi WhatsApp Gateway,Laporan penjualan harian",
 				OriginalPrice: 4500000,
 				PromoPrice:    3000000,
 				ImageURL:      "",
-				RedirectURL:   "https://wa.me/6285702570200?text=Hello%2C%20I%20am%20interested%20in%20your%20POS%20System%20service",
+				RedirectURL:   "https://wa.me/6285702570200?text=Hello%2C%20I%20am%20interested%20in%20your%20UMKM%20Starter%20package",
 				IsActive:      true,
 			},
 			{
-				Title:         "Enterprise Resource Planning (ERP) Suite",
-				Description:   "Full-scale ERP system including HR, finance, supply chain, and customer relationship management.",
-				OriginalPrice: 8000000,
-				PromoPrice:    5000000,
+				Title:         "Paket Sekolah & Lembaga Kursus",
+				Description:   "Learning Management System untuk pengelolaan kelas, tugas, dan nilai, dilengkapi portal siswa/orang tua serta integrasi WhatsApp Gateway untuk notifikasi otomatis. Harga menyesuaikan jumlah siswa dan fitur yang dibutuhkan.",
+				Features:      "Manajemen kelas & kohort,Tugas & penilaian online,Portal siswa/orang tua,Integrasi WhatsApp Gateway,Skalabel sesuai jumlah siswa",
+				OriginalPrice: 0,
+				PromoPrice:    0,
 				ImageURL:      "",
-				RedirectURL:   "https://wa.me/6285702570200?text=Hello%2C%20I%20am%20interested%20in%20your%20ERP%20Suite%20service",
+				RedirectURL:   "https://wa.me/6285702570200?text=Hello%2C%20I%20am%20interested%20in%20your%20Learning%20Suite%20package%20for%20my%20school",
+				IsActive:      true,
+			},
+			{
+				Title:         "Paket Enterprise — ERP Suite",
+				Description:   "ERP terpadu mencakup HR & payroll, keuangan, supply chain, dan CRM dalam satu sistem, dengan integrasi WhatsApp Gateway untuk notifikasi lintas tim — menggantikan kombinasi banyak spreadsheet dengan satu sumber data yang konsisten.",
+				Features:      "Modul HR & payroll,Keuangan & supply chain,CRM & dashboard laporan,Integrasi WhatsApp Gateway,Multi-user & manajemen akses",
+				OriginalPrice: 15000000,
+				PromoPrice:    10000000,
+				ImageURL:      "",
+				RedirectURL:   "https://wa.me/6285702570200?text=Hello%2C%20I%20am%20interested%20in%20your%20Enterprise%20Suite%20package",
 				IsActive:      true,
 			},
 		}
 		for _, s := range services {
 			db.Create(&s)
 		}
-		log.Println("Initial services data seeded successfully!")
+		log.Println("Initial bundle services seeded successfully!")
 	}
 }
-

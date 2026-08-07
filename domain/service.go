@@ -3,9 +3,12 @@ package domain
 import "time"
 
 type Service struct {
-	ID            uint      `json:"id" gorm:"primaryKey" form:"id"`
-	Title         string    `json:"title" form:"title"`
-	Description   string    `json:"description" form:"description"`
+	ID          uint   `json:"id" gorm:"primaryKey" form:"id"`
+	Title       string `json:"title" form:"title"`
+	Description string `json:"description" form:"description"`
+	// Features adalah daftar "yang termasuk" dipisah koma, sama seperti pola
+	// Portfolio.TechStack — dipakai untuk menampilkan bundle sebagai daftar poin.
+	Features      string    `json:"features" form:"features"`
 	OriginalPrice int64     `json:"original_price" form:"original_price"`
 	PromoPrice    int64     `json:"promo_price" form:"promo_price"`
 	ImageURL      string    `json:"image_url" form:"image_url"`
